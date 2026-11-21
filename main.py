@@ -84,6 +84,17 @@ def filtruj_transakcje(transakcje, typ):
     return wynik
 
 
+def filtruj_po_kategorii(transakcje, kategoria):
+
+    wynik = []
+ 
+    for transakcja in transakcje:
+        if transakcja["kategoria"].strip().lower() == kategoria.strip().lower():
+            wynik.append(transakcja)
+
+    return wynik
+
+
 def historia_transakcji(transakcje):
 
     if not transakcje:
@@ -93,7 +104,8 @@ def historia_transakcji(transakcje):
                 
                 1. Wszystkie transakcje
                 2. Tylko przychody
-                3. Tylko wydatki       
+                3. Tylko wydatki
+                4. Filtruj wedlug kategorii       
         """)
 
         try:
@@ -104,11 +116,14 @@ def historia_transakcji(transakcje):
                 wynik_filtrowania = filtruj_transakcje(transakcje, "przychod")
             elif opcja == 3:
                 wynik_filtrowania = filtruj_transakcje(transakcje, "wydatek")
+            elif opcja == 4:
+                kategoria = input("Podaj kategorie: ")
+                wynik_filtrowania = filtruj_po_kategorii(transakcje, kategoria)
             else:
-                print("Podaj opcje od 1 do 3.")
+                print("Podaj opcje od 1 do 4.")
                 return
         except ValueError:
-            print("Podaj opcje od 1 do 3.")
+            print("Podaj opcje od 1 do 4.")
             return
 
         if not wynik_filtrowania:
