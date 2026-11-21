@@ -1,5 +1,4 @@
-def dodaj_przychod(transakcje):
-
+def pobierz_kwote():
 
     while True:
         try:
@@ -7,11 +6,14 @@ def dodaj_przychod(transakcje):
             if kwota <= 0:
                 print("Kwota musi byc wieksza od zera.")
                 continue
-            break
+            return kwota
         except ValueError:
-            print("Nieprawidlowa kwota.")
-            continue
+            print("Nieprawidlowa kwota.")   
 
+
+def dodaj_przychod(transakcje):
+
+    kwota = pobierz_kwote()
     kategoria = input("Podaj kategorie: ")
     opis = input("Podaj opis: ")
 
@@ -27,12 +29,33 @@ def dodaj_przychod(transakcje):
     print(f"Przychod {kwota:.2f} PLN zostal dodany.")
 
 
-def dodaj_wydatek():
-    pass
+def dodaj_wydatek(transakcje):
+
+    kwota = pobierz_kwote()
+    kategoria = input("Podaj kategorie: ")
+    opis = input("Podaj opis: ")
+
+    slownik_transakcji = {
+        "typ": "wydatek",
+        "kwota": kwota,
+        "kategoria": kategoria,
+        "opis": opis
+    }
+
+    transakcje.append(slownik_transakcji)
+
+    print(f"Wydatek {kwota:.2f} PLN zostal dodany.")
 
 
-def historia_transakcji():
-    pass
+def historia_transakcji(transakcje):
+    
+    print("==== HISTORIA TRANSAKCJI ====")
+
+    if not transakcje:
+        print("Brak transakcji.")
+    else:
+        for numer, transakcja in enumerate(transakcje, start=1):
+            print(f"{numer}. [{transakcja['typ'].upper()}] {transakcja['kwota']:.2f} PLN | {transakcja['kategoria']} | {transakcja['opis']}")
 
 
 def pokaz_saldo():
@@ -64,9 +87,9 @@ def pokaz_menu(transakcje):
         if opcja == 1:
             dodaj_przychod(transakcje)
         elif opcja == 2:
-            print("Dodaj wydatek")
+            dodaj_wydatek(transakcje)
         elif opcja == 3:
-            print("Historia teanskacji")
+            historia_transakcji(transakcje)
         elif opcja == 4:
             print("Pokaz saldo")
         elif opcja == 5:
