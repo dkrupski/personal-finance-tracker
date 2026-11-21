@@ -1,5 +1,30 @@
-def dodaj_przychod():
-    pass
+def dodaj_przychod(transakcje):
+
+
+    while True:
+        try:
+            kwota = float(input("Podaj kwote: "))
+            if kwota <= 0:
+                print("Kwota musi byc wieksza od zera.")
+                continue
+            break
+        except ValueError:
+            print("Nieprawidlowa kwota.")
+            continue
+
+    kategoria = input("Podaj kategorie: ")
+    opis = input("Podaj opis: ")
+
+    slownik_transakcji = {
+        "typ": "przychod",
+        "kwota": kwota,
+        "kategoria": kategoria,
+        "opis": opis
+    }
+
+    transakcje.append(slownik_transakcji)
+
+    print(f"Przychod {kwota:.2f} PLN zostal dodany.")
 
 
 def dodaj_wydatek():
@@ -14,7 +39,7 @@ def pokaz_saldo():
     pass
 
 
-def pokaz_menu():
+def pokaz_menu(transakcje):
 
     is_run = True
 
@@ -37,7 +62,7 @@ def pokaz_menu():
             continue
 
         if opcja == 1:
-            print("Dodaj przychod")
+            dodaj_przychod(transakcje)
         elif opcja == 2:
             print("Dodaj wydatek")
         elif opcja == 3:
@@ -51,7 +76,8 @@ def pokaz_menu():
 
 
 def main():
-    pokaz_menu()
+    transakcje = []
+    pokaz_menu(transakcje)
 
 
 if __name__ == "__main__":
