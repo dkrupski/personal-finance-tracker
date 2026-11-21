@@ -70,14 +70,52 @@ def dodaj_wydatek(transakcje):
     print(f"Wydatek {kwota:.2f} PLN zostal dodany.")
 
 
-def historia_transakcji(transakcje):
+def filtruj_transakcje(transakcje, typ):
+
+    wynik = []
+
+    if typ == "wszystkie":
+        return transakcje
     
-    print("==== HISTORIA TRANSAKCJI ====")
+    for transakcja in transakcje:
+        if transakcja["typ"] == typ:
+            wynik.append(transakcja)
+
+    return wynik
+
+
+def historia_transakcji(transakcje):
 
     if not transakcje:
         print("Brak transakcji.")
     else:
-        for numer, transakcja in enumerate(transakcje, start=1):
+        print("""==== HISTORIA TRANSAKCJI ====
+                
+                1. Wszystkie transakcje
+                2. Tylko przychody
+                3. Tylko wydatki       
+        """)
+
+        try:
+            opcja = int(input("Wybierz opcje: "))
+            if opcja == 1:
+                wynik_filtrowania = filtruj_transakcje(transakcje, "wszystkie")
+            elif opcja == 2:
+                wynik_filtrowania = filtruj_transakcje(transakcje, "przychod")
+            elif opcja == 3:
+                wynik_filtrowania = filtruj_transakcje(transakcje, "wydatek")
+            else:
+                print("Podaj opcje od 1 do 3.")
+                return
+        except ValueError:
+            print("Podaj opcje od 1 do 3.")
+            return
+
+        if not wynik_filtrowania:
+            print("Brak transakcji dla wybranego filtra.")
+            return
+        
+        for numer, transakcja in enumerate(wynik_filtrowania, start=1):
             print(f"{numer}. [{transakcja['typ'].upper()}] {transakcja['kwota']:.2f} PLN | {transakcja['kategoria']} | {transakcja['opis']}")
 
 
