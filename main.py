@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 
 
 def pobierz_kwote():
@@ -42,7 +43,8 @@ def dodaj_przychod(transakcje):
         "typ": "przychod",
         "kwota": kwota,
         "kategoria": kategoria,
-        "opis": opis
+        "opis": opis,
+        "data": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     }
 
     transakcje.append(slownik_transakcji)
@@ -61,7 +63,8 @@ def dodaj_wydatek(transakcje):
         "typ": "wydatek",
         "kwota": kwota,
         "kategoria": kategoria,
-        "opis": opis
+        "opis": opis,
+        "data": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     }
 
     transakcje.append(slownik_transakcji)
@@ -131,7 +134,9 @@ def historia_transakcji(transakcje):
             return
         
         for numer, transakcja in enumerate(wynik_filtrowania, start=1):
+            data = transakcja.get("data", "Brak daty")
             print(f"{numer}. [{transakcja['typ'].upper()}] {transakcja['kwota']:.2f} PLN | {transakcja['kategoria']} | {transakcja['opis']}")
+            print(f"Data: {data}\n")
 
 
 def pokaz_saldo(transakcje):
