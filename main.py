@@ -150,6 +150,40 @@ def pokaz_saldo(transakcje):
     print(f"Przychody: {suma_przychodow:.2f} PLN\nWydatki: {suma_wydatkow:.2f} PLN\nSaldo: {saldo:.2f} PLN")
 
 
+def podsumuj_wydatki(transakcje):
+   
+    podsumowanie = {}
+
+    for transakcja in transakcje:
+        if transakcja["typ"] == "wydatek":
+            kategoria = transakcja["kategoria"].strip().lower()
+            
+            if kategoria in podsumowanie:
+                podsumowanie[kategoria] += transakcja["kwota"]
+            else:
+                podsumowanie[kategoria] = transakcja["kwota"]
+
+    return podsumowanie
+
+
+def pokaz_podsumowanie_wydatkow(transakcje):
+
+    print("==== WYDATKI WEDLUG KATEGORII ====\n")
+
+    podsumowanie = podsumuj_wydatki(transakcje)
+
+    if not podsumowanie:
+        print("Brak wydatkow")
+        return
+
+    for kategoria, suma in podsumowanie.items():
+        print(f"{kategoria}: {suma:.2f} PLN")
+
+    laczne_wydatki = sum(podsumowanie.values())
+
+    print(f"\nLaczne wydatki: {laczne_wydatki:.2f} PLN")
+
+
 def pokaz_menu(transakcje):
 
     is_run = True
@@ -163,13 +197,14 @@ def pokaz_menu(transakcje):
         2. Dodaj wydatek
         3. Historia transakcji
         4. Pokaz saldo
-        5. Zakoncz
+        5. Podsumowanie wydatkow
+        6. Zakoncz
         """)
 
         try:
             opcja = int(input("Wybierz opcje: "))
         except ValueError:
-            print("Podaj opcje od 1 do 5.")
+            print("Podaj opcje od 1 do 6.")
             continue
 
         if opcja == 1:
@@ -181,9 +216,11 @@ def pokaz_menu(transakcje):
         elif opcja == 4:
             pokaz_saldo(transakcje)
         elif opcja == 5:
+            pokaz_podsumowanie_wydatkow(transakcje)
+        elif opcja == 6:
             is_run = False
         else:
-            print("Nieprawidlowa opcja")
+            print("Podaj opcje od 1 do 6.")
 
 
 def main():
