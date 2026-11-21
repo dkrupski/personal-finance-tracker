@@ -1,0 +1,10 @@
+# Dane finansowe
+transakcje.json
+transakcje.backup.json
+
+# Pliki tymczasowe Pythona
+__pycache__/
+*.pyc
+
+# Srodowisko wirtualne
+.venv/

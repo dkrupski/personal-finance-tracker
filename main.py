@@ -1,3 +1,6 @@
+import json
+
+
 def pobierz_kwote():
 
     while True:
@@ -9,6 +12,24 @@ def pobierz_kwote():
             return kwota
         except ValueError:
             print("Nieprawidlowa kwota.")   
+
+
+def zapisz_transakcje(transakcje):
+    with open("transakcje.json", "w", encoding="utf-8") as plik:
+        json.dump(transakcje, plik, indent=4, ensure_ascii=False)
+
+
+def wczytaj_transakcje():
+
+    try:
+        with open("transakcje.json", "r", encoding="utf-8") as plik:
+            transakcje = json.load(plik)
+        return transakcje
+    except FileNotFoundError:
+        return []
+    except json.JSONDecodeError:
+        print("Blad: Plik transakcje.json jest uszkodzony.")
+        return None
 
 
 def dodaj_przychod(transakcje):
@@ -25,6 +46,7 @@ def dodaj_przychod(transakcje):
     }
 
     transakcje.append(slownik_transakcji)
+    zapisz_transakcje(transakcje)
 
     print(f"Przychod {kwota:.2f} PLN zostal dodany.")
 
@@ -43,6 +65,7 @@ def dodaj_wydatek(transakcje):
     }
 
     transakcje.append(slownik_transakcji)
+    zapisz_transakcje(transakcje)
 
     print(f"Wydatek {kwota:.2f} PLN zostal dodany.")
 
@@ -58,8 +81,20 @@ def historia_transakcji(transakcje):
             print(f"{numer}. [{transakcja['typ'].upper()}] {transakcja['kwota']:.2f} PLN | {transakcja['kategoria']} | {transakcja['opis']}")
 
 
-def pokaz_saldo():
-    pass
+def pokaz_saldo(transakcje):
+
+    suma_przychodow = 0
+    suma_wydatkow = 0
+
+    for transakcja in transakcje:
+        if transakcja["typ"] == "przychod":
+            suma_przychodow += transakcja["kwota"]
+        elif transakcja["typ"] == "wydatek":
+            suma_wydatkow += transakcja["kwota"]
+
+    saldo = suma_przychodow - suma_wydatkow
+
+    print(f"Przychody: {suma_przychodow:.2f} PLN\nWydatki: {suma_wydatkow:.2f} PLN\nSaldo: {saldo:.2f} PLN")
 
 
 def pokaz_menu(transakcje):
@@ -91,7 +126,7 @@ def pokaz_menu(transakcje):
         elif opcja == 3:
             historia_transakcji(transakcje)
         elif opcja == 4:
-            print("Pokaz saldo")
+            pokaz_saldo(transakcje)
         elif opcja == 5:
             is_run = False
         else:
@@ -99,7 +134,12 @@ def pokaz_menu(transakcje):
 
 
 def main():
-    transakcje = []
+
+    transakcje = wczytaj_transakcje()
+
+    if transakcje is None:
+        return
+    
     pokaz_menu(transakcje)
 
 
