@@ -10,3 +10,6 @@ __pycache__/
 
 # Srodowisko wirtualne
 .venv/
+
+# Pytest
+.pytest_cache/

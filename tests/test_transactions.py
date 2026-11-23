@@ -21,4 +21,4 @@ def test_dodaj_przychod(tmp_path, monkeypatch):
 
     assert len(transakcje) == 1
     assert transakcje[0]["typ"] == "przychod"
-    assert transakcje[0]["kwota"] == "2500"
+    assert transakcje[0]["kwota"] == 2500
