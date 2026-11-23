@@ -337,7 +337,73 @@ def usun_transakcje(transakcje):
         print("Nieprawidlowy wybor (t/n).")
 
 
+def edytuj_transakcje(transakcje):
 
+    print("==== EDYCJA TRANSAKCJI ====")
+
+    if not transakcje:
+        print("Brak transakcji.")
+        return
+
+    for numer, transakcja in enumerate(transakcje, start=1):
+        print(f"{numer}. [{transakcja['typ'].upper()}] {transakcja['kwota']:.2f} PLN | {transakcja['kategoria']} | {transakcja['opis']}")
+
+    try:
+        numer_transakcji = int(input("Podaj numer transakcji do edycji: "))
+    except ValueError:
+        print("Nieprawidlowy numer transakcji.")
+        return
+
+    if numer_transakcji < 1 or numer_transakcji > len(transakcje):
+        print("Nieprawidlowy numer transakcji.")
+        return
+
+    indeks_transakcji = numer_transakcji - 1
+
+    print("Co chcesz zmienic?\n")
+    print("""
+    1. Kwote
+    2. Kategorie
+    3. Opis
+    4. Anuluj
+    """)
+
+    try:
+        opcja = int(input("Wybierz opcje: "))
+    except ValueError:
+        print("Nieprawidlowa opcja.")
+        return
+
+    if opcja < 1 or opcja > 4:
+        print("Nieprawidlowa opcja.")
+        return
+   
+    if opcja == 4:
+        print("Anulowano edycje.")
+        return
+
+    if opcja == 1:
+        nowa_kwota = pobierz_kwote()
+        transakcje[indeks_transakcji]["kwota"] = nowa_kwota
+        print("Kwota zostala zmieniona.")
+    elif opcja == 2:
+        nowa_kategoria = input("Podaj nowa kategorie: ").strip()
+        if not nowa_kategoria:
+            print("Nieprawidlowe dane.")
+            return
+        transakcje[indeks_transakcji]["kategoria"] = nowa_kategoria
+        print("Kategoria zostala zmieniona.")
+    elif opcja == 3:
+        nowy_opis = input("Podaj nowy opis: ").strip()
+        if not nowy_opis:
+            print("Nieprawidlowe dane.")
+            return
+        transakcje[indeks_transakcji]["opis"] = nowy_opis
+        print("Opis zostal zmieniony.")
+    
+    zapisz_transakcje(transakcje)
+
+    
 def pokaz_menu(transakcje):
 
     is_run = True
@@ -355,13 +421,14 @@ def pokaz_menu(transakcje):
         6. Raport miesieczny
         7. Filtruj transakcje wedlug dat
         8. Usun transakcje
-        9. Zakoncz
+        9. Edytuj transakcje
+        10. Zakoncz
         """)
 
         try:
             opcja = int(input("Wybierz opcje: "))
         except ValueError:
-            print("Podaj opcje od 1 do 9.")
+            print("Podaj opcje od 1 do 10.")
             continue
 
         if opcja == 1:
@@ -381,9 +448,11 @@ def pokaz_menu(transakcje):
         elif opcja == 8:
             usun_transakcje(transakcje)
         elif opcja == 9:
+            edytuj_transakcje(transakcje)
+        elif opcja == 10:
             is_run = False
         else:
-            print("Podaj opcje od 1 do 9.")
+            print("Podaj opcje od 1 do 10.")
 
 
 def main():
