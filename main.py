@@ -1,5 +1,6 @@
 import json
 from datetime import datetime
+import csv
 
 
 def pobierz_kwote():
@@ -403,6 +404,25 @@ def edytuj_transakcje(transakcje):
     
     zapisz_transakcje(transakcje)
 
+
+def eksportuj_transakcje(transakcje):
+
+    print("==== EKSPORT TRANSAKCJI ====")
+
+    if not transakcje:
+        print("Brak transakcji.")
+        return
+
+    with open("eksport_transakcji.csv", "w", newline="", encoding="utf-8-sig") as plik:
+        writer = csv.writer(plik, delimiter=";")
+        writer.writerow(["typ", "kwota", "kategoria", "opis", "data"])
+
+        for transakcja in transakcje:
+            data = transakcja.get("data", "")
+            writer.writerow([transakcja["typ"], transakcja["kwota"], transakcja["kategoria"], transakcja["opis"], data])
+
+    print("Transakcje zostaly wyeksportowane.")
+
     
 def pokaz_menu(transakcje):
 
@@ -422,13 +442,14 @@ def pokaz_menu(transakcje):
         7. Filtruj transakcje wedlug dat
         8. Usun transakcje
         9. Edytuj transakcje
-        10. Zakoncz
+        10. Eksportuj transakcje do CSV
+        11. Zakoncz
         """)
 
         try:
             opcja = int(input("Wybierz opcje: "))
         except ValueError:
-            print("Podaj opcje od 1 do 10.")
+            print("Podaj opcje od 1 do 11.")
             continue
 
         if opcja == 1:
@@ -450,9 +471,11 @@ def pokaz_menu(transakcje):
         elif opcja == 9:
             edytuj_transakcje(transakcje)
         elif opcja == 10:
+            eksportuj_transakcje(transakcje)
+        elif opcja == 11:
             is_run = False
         else:
-            print("Podaj opcje od 1 do 10.")
+            print("Podaj opcje od 1 do 11.")
 
 
 def main():
