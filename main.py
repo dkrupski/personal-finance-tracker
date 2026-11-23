@@ -1,4 +1,4 @@
-import json
+import json, os
 from datetime import datetime
 import csv
 
@@ -17,20 +17,72 @@ def pobierz_kwote():
 
 
 def zapisz_transakcje(transakcje):
-    with open("transakcje.json", "w", encoding="utf-8") as plik:
-        json.dump(transakcje, plik, indent=4, ensure_ascii=False)
+    
+    try: 
+        with open("transakcje.tmp", "w", encoding="utf-8") as plik:
+            json.dump(transakcje, plik, indent=4, ensure_ascii=False)
+        os.replace("transakcje.tmp", "transakcje.json")
+        return True
+    except OSError as blad:
+        print(f"Nie udalo sie zapisac transakcji: {blad}")
+        try:
+            if os.path.exists("transakcje.tmp"):
+                os.remove("transakcje.tmp")
+        except OSError:
+            print("Nie udalo sie usunac transakcje.tmp")
+        return False
 
 
 def wczytaj_transakcje():
 
+    wymagane_pola = ["typ", "kwota", "kategoria", "opis"]
+
     try:
         with open("transakcje.json", "r", encoding="utf-8") as plik:
             transakcje = json.load(plik)
-        return transakcje
+
+            if not isinstance(transakcje, list):
+                print("Nieprawidlowa struktura pliku JSON.")
+                return None
+
+            for transakcja in transakcje:
+                if not isinstance(transakcja, dict):
+                    print("Nieprawidlowa struktura transakcji.")
+                    return None
+                for pole in wymagane_pola:
+                    if pole not in transakcja:
+                        print("Nieprawidlowa struktura transakcji.")
+                        return None
+                if transakcja["typ"] not in ("przychod", "wydatek"):
+                    print("Nieprawidlowe dane transakcji.")
+                    return None
+                if isinstance(transakcja["kwota"], bool) or not isinstance(transakcja["kwota"], (int, float)) or transakcja["kwota"] <= 0:
+                    print("Nieprawidlowe dane transakcji.")
+                    return None
+                if not isinstance(transakcja["kategoria"],str) or not transakcja["kategoria"].strip():
+                    print("Nieprawidlowe dane transakcji.")
+                    return None
+                if not isinstance(transakcja["opis"],str) or not transakcja["opis"].strip():
+                    print("Nieprawidlowe dane transakcji.")
+                    return None
+                if "data" in transakcja:
+                    if not isinstance(transakcja["data"], str):
+                        print("Nieprawidlowa data transakcji.")
+                        return None
+                    try:
+                        datetime.strptime(transakcja["data"], "%Y-%m-%d %H:%M:%S")
+                    except ValueError:
+                        print("Nieprawidlowa data transakcji.")
+                        return None
+                
+            return transakcje
     except FileNotFoundError:
         return []
     except json.JSONDecodeError:
         print("Blad: Plik transakcje.json jest uszkodzony.")
+        return None
+    except OSError as blad:
+        print(f"Nie udalo sie odczytac transakcji: {blad}")
         return None
 
 
@@ -49,9 +101,11 @@ def dodaj_przychod(transakcje):
     }
 
     transakcje.append(slownik_transakcji)
-    zapisz_transakcje(transakcje)
-
-    print(f"Przychod {kwota:.2f} PLN zostal dodany.")
+    if zapisz_transakcje(transakcje):
+        print(f"Przychod {kwota:.2f} PLN zostal dodany.")
+    else:
+        transakcje.pop()
+        print("Nie udalo sie zapisac zmian.")
 
 
 def dodaj_wydatek(transakcje):
@@ -69,9 +123,11 @@ def dodaj_wydatek(transakcje):
     }
 
     transakcje.append(slownik_transakcji)
-    zapisz_transakcje(transakcje)
-
-    print(f"Wydatek {kwota:.2f} PLN zostal dodany.")
+    if zapisz_transakcje(transakcje):
+        print(f"Wydatek {kwota:.2f} PLN zostal dodany.")
+    else:
+        transakcje.pop()
+        print("Nie udalo sie zapisac zmian.")
 
 
 def filtruj_transakcje(transakcje, typ):
@@ -329,9 +385,12 @@ def usun_transakcje(transakcje):
     potwierdzenie = input("Czy na pewno usunac transakcje? (t/n): ").strip().lower()
 
     if potwierdzenie == "t":
-        transakcje.pop(indeks_listy)
-        zapisz_transakcje(transakcje)
-        print("Transakcja zostala usunieta.")
+        usunieta_transakcja = transakcje.pop(indeks_listy)
+        if zapisz_transakcje(transakcje):
+            print("Transakcja zostala usunieta.")
+        else:
+            transakcje.insert(indeks_listy, usunieta_transakcja)
+            print("Nie udalo sie usunac transakcji.")
     elif potwierdzenie == "n":
         print("Anulowano usuwanie.")
     else:
@@ -384,26 +443,39 @@ def edytuj_transakcje(transakcje):
         return
 
     if opcja == 1:
+        stara_kwota = transakcje[indeks_transakcji]["kwota"]
         nowa_kwota = pobierz_kwote()
         transakcje[indeks_transakcji]["kwota"] = nowa_kwota
-        print("Kwota zostala zmieniona.")
+        if zapisz_transakcje(transakcje):
+            print("Kwota zostala zmieniona.")
+        else:
+            transakcje[indeks_transakcji]["kwota"] = stara_kwota
+            print("Nie udalo sie zmienic kwoty.")
     elif opcja == 2:
+        stara_kategoria = transakcje[indeks_transakcji]["kategoria"]
         nowa_kategoria = input("Podaj nowa kategorie: ").strip()
         if not nowa_kategoria:
             print("Nieprawidlowe dane.")
             return
         transakcje[indeks_transakcji]["kategoria"] = nowa_kategoria
-        print("Kategoria zostala zmieniona.")
+        if zapisz_transakcje(transakcje):
+            print("Kategoria zostala zmieniona.")
+        else:
+            transakcje[indeks_transakcji]["kategoria"] = stara_kategoria
+            print("Nie udalo sie zmienic kategorii.")
     elif opcja == 3:
+        stary_opis = transakcje[indeks_transakcji]["opis"]
         nowy_opis = input("Podaj nowy opis: ").strip()
         if not nowy_opis:
             print("Nieprawidlowe dane.")
             return
         transakcje[indeks_transakcji]["opis"] = nowy_opis
-        print("Opis zostal zmieniony.")
+        if zapisz_transakcje(transakcje):
+            print("Opis zostal zmieniony.")
+        else:
+            transakcje[indeks_transakcji]["opis"] = stary_opis
+            print("Nie udalo sie zmienic opisu.")
     
-    zapisz_transakcje(transakcje)
-
 
 def eksportuj_transakcje(transakcje):
 

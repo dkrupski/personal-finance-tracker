@@ -2,6 +2,7 @@
 transakcje.json
 transakcje.backup.json
 eksport_transakcji.csv
+transakcje.tmp
 
 # Pliki tymczasowe Pythona
 __pycache__/
