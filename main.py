@@ -189,6 +189,75 @@ def pokaz_podsumowanie_wydatkow(transakcje):
     print(f"\nLaczne wydatki: {laczne_wydatki:.2f} PLN")
 
 
+def filtruj_po_miesiacu(transakcje, rok, miesiac):
+
+    wynik = []
+
+    for transakcja in transakcje:
+        tekst_daty = transakcja.get("data")
+
+        if not tekst_daty:
+            continue
+
+        data = datetime.strptime(tekst_daty, "%Y-%m-%d %H:%M:%S")
+
+        if data.year == rok and data.month == miesiac:
+            wynik.append(transakcja)
+
+    return wynik
+
+
+def oblicz_raport_miesieczny(transakcje, rok, miesiac):
+
+    transakcje_po_miesiacu = filtruj_po_miesiacu(transakcje, rok, miesiac)
+    raport_miesieczny = {
+        "przychody": 0,
+        "wydatki": 0,
+        "saldo": 0
+    }
+
+    for transakcja in transakcje_po_miesiacu:
+
+        typ = transakcja["typ"]
+
+        if typ == "przychod":
+            raport_miesieczny["przychody"] += transakcja["kwota"]
+        elif typ == "wydatek":
+            raport_miesieczny["wydatki"] += transakcja["kwota"]
+
+    raport_miesieczny["saldo"] = raport_miesieczny["przychody"] - raport_miesieczny["wydatki"]
+
+    return raport_miesieczny
+
+
+def pokaz_raport_miesieczny(transakcje):
+
+    print("==== RAPORT MIESIECZNY ====")
+
+    try:
+        rok = int(input("Podaj rok: "))
+        miesiac = int(input("Podaj miesiac: "))
+    except ValueError:
+        print("Podaj poprawny rok/miesiac.")
+        return
+
+    if rok <= 0:
+        print("Podaj poprawny rok.")
+        return
+    
+    if miesiac < 1 or miesiac > 12:
+        print("Podaj poprawny miesiac.")
+        return
+
+    print(f"Raport za {rok}-{miesiac:02d}")
+
+    raport = oblicz_raport_miesieczny(transakcje, rok, miesiac)
+
+    print(f"Przychody {raport['przychody']:.2f} PLN")
+    print(f"Wydatki: {raport['wydatki']:.2f} PLN")
+    print(f"Saldo: {raport['saldo']:.2f} PLN")
+
+
 def pokaz_menu(transakcje):
 
     is_run = True
@@ -203,13 +272,14 @@ def pokaz_menu(transakcje):
         3. Historia transakcji
         4. Pokaz saldo
         5. Podsumowanie wydatkow
-        6. Zakoncz
+        6. Raport miesieczny
+        7. Zakoncz
         """)
 
         try:
             opcja = int(input("Wybierz opcje: "))
         except ValueError:
-            print("Podaj opcje od 1 do 6.")
+            print("Podaj opcje od 1 do 7.")
             continue
 
         if opcja == 1:
@@ -223,9 +293,11 @@ def pokaz_menu(transakcje):
         elif opcja == 5:
             pokaz_podsumowanie_wydatkow(transakcje)
         elif opcja == 6:
+            pokaz_raport_miesieczny(transakcje)
+        elif opcja == 7:
             is_run = False
         else:
-            print("Podaj opcje od 1 do 6.")
+            print("Podaj opcje od 1 do 7.")
 
 
 def main():
