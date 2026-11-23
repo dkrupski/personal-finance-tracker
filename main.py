@@ -302,6 +302,42 @@ def pokaz_transakcje_z_zakresu(transakcje):
         print(f"Data: {transakcja['data']}\n")
 
 
+def usun_transakcje(transakcje):
+
+    print("==== USUWANIE TRANSAKCJI ====")
+
+    if not transakcje:
+        print("Brak transakcji.")
+        return
+
+    for numer, transakcja in enumerate(transakcje, start=1):
+        print(f"{numer}. [{transakcja['typ'].upper()}] {transakcja['kwota']:.2f} PLN | {transakcja['kategoria']} | {transakcja['opis']}")
+
+    try:
+        numer_do_usuniecia = int(input("Podaj numer transakcji do usuniecia: "))
+    except ValueError:
+        print("Nieprawidlowy numer transakcji.")
+        return
+
+    if numer_do_usuniecia < 1 or numer_do_usuniecia > len(transakcje):
+        print("Nieprawidlowy numer transakcji.")
+        return
+
+    indeks_listy = numer_do_usuniecia - 1
+
+    potwierdzenie = input("Czy na pewno usunac transakcje? (t/n): ").strip().lower()
+
+    if potwierdzenie == "t":
+        transakcje.pop(indeks_listy)
+        zapisz_transakcje(transakcje)
+        print("Transakcja zostala usunieta.")
+    elif potwierdzenie == "n":
+        print("Anulowano usuwanie.")
+    else:
+        print("Nieprawidlowy wybor (t/n).")
+
+
+
 def pokaz_menu(transakcje):
 
     is_run = True
@@ -318,13 +354,14 @@ def pokaz_menu(transakcje):
         5. Podsumowanie wydatkow
         6. Raport miesieczny
         7. Filtruj transakcje wedlug dat
-        8. Zakoncz
+        8. Usun transakcje
+        9. Zakoncz
         """)
 
         try:
             opcja = int(input("Wybierz opcje: "))
         except ValueError:
-            print("Podaj opcje od 1 do 8.")
+            print("Podaj opcje od 1 do 9.")
             continue
 
         if opcja == 1:
@@ -342,9 +379,11 @@ def pokaz_menu(transakcje):
         elif opcja == 7:
             pokaz_transakcje_z_zakresu(transakcje)
         elif opcja == 8:
+            usun_transakcje(transakcje)
+        elif opcja == 9:
             is_run = False
         else:
-            print("Podaj opcje od 1 do 8.")
+            print("Podaj opcje od 1 do 9.")
 
 
 def main():
