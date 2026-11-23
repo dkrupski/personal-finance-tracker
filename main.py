@@ -258,6 +258,50 @@ def pokaz_raport_miesieczny(transakcje):
     print(f"Saldo: {raport['saldo']:.2f} PLN")
 
 
+def filtruj_po_zakresie_dat(transakcje, data_od, data_do):
+
+    wynik = []
+
+    for transakcja in transakcje:
+        tekst_daty = transakcja.get("data")
+
+        if not tekst_daty:
+            continue
+
+        data_transakcji = datetime.strptime(tekst_daty, "%Y-%m-%d %H:%M:%S")
+
+        if data_od.date() <= data_transakcji.date() <= data_do.date():
+            wynik.append(transakcja)
+
+    return wynik
+
+
+def pokaz_transakcje_z_zakresu(transakcje):
+
+    print("==== TRANSAKCJE Z ZAKRESU DAT ====")
+
+    try:
+        data_od = datetime.strptime(input("Podaj date poczatkowa (RRRR-MM-DD): "), "%Y-%m-%d")
+        data_do = datetime.strptime(input("Podaj date koncowa (RRRR-MM-DD): "), "%Y-%m-%d")
+    except ValueError:
+        print("Nieprawidlowa data")
+        return
+
+    if data_od > data_do:
+        print("Data poczatkowa nie moze byc pozniejsza niz data koncowa.")
+        return
+
+    transakcje_z_zakresu = filtruj_po_zakresie_dat(transakcje, data_od, data_do)
+
+    if not transakcje_z_zakresu:
+        print("Brak transakcji w podanym zakresie.")
+        return
+
+    for numer, transakcja in enumerate(transakcje_z_zakresu, start=1):
+        print(f"{numer}. [{transakcja['typ'].upper()}] {transakcja['kwota']:.2f} PLN | {transakcja['kategoria']} | {transakcja['opis']}")
+        print(f"Data: {transakcja['data']}\n")
+
+
 def pokaz_menu(transakcje):
 
     is_run = True
@@ -273,13 +317,14 @@ def pokaz_menu(transakcje):
         4. Pokaz saldo
         5. Podsumowanie wydatkow
         6. Raport miesieczny
-        7. Zakoncz
+        7. Filtruj transakcje wedlug dat
+        8. Zakoncz
         """)
 
         try:
             opcja = int(input("Wybierz opcje: "))
         except ValueError:
-            print("Podaj opcje od 1 do 7.")
+            print("Podaj opcje od 1 do 8.")
             continue
 
         if opcja == 1:
@@ -295,9 +340,11 @@ def pokaz_menu(transakcje):
         elif opcja == 6:
             pokaz_raport_miesieczny(transakcje)
         elif opcja == 7:
+            pokaz_transakcje_z_zakresu(transakcje)
+        elif opcja == 8:
             is_run = False
         else:
-            print("Podaj opcje od 1 do 7.")
+            print("Podaj opcje od 1 do 8.")
 
 
 def main():
